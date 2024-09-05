@@ -1,23 +1,38 @@
 import { google } from "googleapis";
-
-// initialize the Youtube API library
-const youtube = google.youtube({
-  version: 'v3',
-  auth: ''
-});
-
-// a very simple example of searching for youtube videos
-async function getVideos() {
-  const res = await youtube.search.list({
-    part: ['snippet'],
-    q: 'อย่าปล่อยมือ',
-    type: ['video'],
-    // maxResults: maxResultsPerChannel,
-    });
-  res.data.items?.forEach(item => {
-    console.log(item.id)
-    console.log(item.snippet)
-  })
+interface Video {
+  videoId: string;
+  title: string;
+  thumbnailUrl: URL;
 }
 
-getVideos()
+async function searchVideos(queryString: string): Promise<Video[]> {
+  const youtube = google.youtube({
+    version: "v3",
+    auth: process.env.YOUTUBE_API_KEY,
+  });
+
+  const res = await youtube.search.list({
+    part: ["snippet"],
+    q: queryString,
+    type: ["video"],
+  });
+
+  if (!res.data.items) {
+    return [] as Video[];
+  }
+
+  const result = res.data.items.map((item) => {
+    return {
+      videoId: item.id?.videoId || "",
+      title: item.snippet?.title || "",
+      thumbnailUrl: item.snippet?.thumbnails?.high?.url
+        ? new URL(item.snippet?.thumbnails?.high?.url)
+        : new URL(""),
+    };
+  });
+
+  return result;
+}
+searchVideos("อย่าปล่อยมือ").then((x) => {
+  console.log(x);
+});
