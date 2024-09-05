@@ -1,5 +1,6 @@
 import { google } from "googleapis";
-interface Video {
+
+export interface Video {
   videoId: string;
   title: string;
   thumbnailUrl: URL;
@@ -33,6 +34,7 @@ async function searchVideos(queryString: string): Promise<Video[]> {
 
   return result;
 }
+
 searchVideos("อย่าปล่อยมือ").then((x) => {
   console.log(x);
 });
