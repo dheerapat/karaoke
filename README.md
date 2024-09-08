@@ -1,5 +1,7 @@
 # youtube-karaoke
 
+> This project is not affiliated with, endorsed by, or in any way officially connected to YouTube or Alphabet Inc.
+
 This project is for those who love in music!
 
 This Node application can be used to fetch YouTube video's data
