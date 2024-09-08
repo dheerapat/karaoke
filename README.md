@@ -16,7 +16,8 @@ YouTube limit your action. (Each search consume 100 quotas from your 10,000 quot
 
 ### Prerequisite
 
-You need to have Google cloud account and enabled YouTube Data API after that get the API key from credentials tab in Google cloud console.
+You need to have Google cloud account and YouTube Data API enabled.
+Also don't forget to copy your API key from credentials tab in Google cloud console.
 
 ### Step to run the project
 
