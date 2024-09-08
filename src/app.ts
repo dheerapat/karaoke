@@ -29,7 +29,7 @@ export class YouTubeKaraokeVideoSearcher implements IVideoSearcher {
         part: ['snippet'],
         q: queryString + ' karaoke',
         type: ['video'],
-        maxResults: 10,
+        maxResults: 25, // max: 50
       });
 
       const result = this.parseSearchResult(res.data.items);
