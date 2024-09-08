@@ -1,7 +1,9 @@
-import { YouTubeVideoSearcher } from "./app";
+import {YouTubeKaraokeVideoSearcher} from './app';
 
-const searcher = new YouTubeVideoSearcher(process.env.YOUTUBE_API_KEY ?? '')
+const searcher = new YouTubeKaraokeVideoSearcher(
+  process.env.YOUTUBE_API_KEY ?? ''
+);
 
-searcher.searchVideo('karaoke').then(res => {
-  console.log(res)
-})
+searcher.searchVideo('โจอี้').then(res => {
+  console.log(res);
+});

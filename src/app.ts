@@ -10,8 +10,11 @@ export interface IVideoSearcher {
   searchVideo(queryString: string): Promise<Video[]>;
 }
 
-export class YouTubeVideoSearcher implements IVideoSearcher {
+export class YouTubeKaraokeVideoSearcher implements IVideoSearcher {
   private client: youtube_v3.Youtube;
+  private channels = process.env.CHANNEL_IDS
+    ? process.env.CHANNEL_IDS.split(',')
+    : [];
 
   constructor(apiKey: string) {
     this.client = google.youtube({
@@ -24,8 +27,9 @@ export class YouTubeVideoSearcher implements IVideoSearcher {
     try {
       const res = await this.client.search.list({
         part: ['snippet'],
-        q: queryString,
+        q: queryString + ' karaoke',
         type: ['video'],
+        maxResults: 10,
       });
 
       const result = this.parseSearchResult(res.data.items);
@@ -47,12 +51,18 @@ export class YouTubeVideoSearcher implements IVideoSearcher {
       return [];
     }
 
-    return items.map(item => {
+    const targets = items.filter(
+      item =>
+        item.snippet?.channelId &&
+        this.channels.includes(item.snippet.channelId)
+    );
+
+    return targets.map(target => {
       return {
-        videoUrl: this.createVideoUrl(item.id?.videoId),
-        title: item.snippet?.title || '',
+        videoUrl: this.createVideoUrl(target.id?.videoId),
+        title: target.snippet?.title || '',
         thumbnailUrl: this.createThumbnailUrl(
-          item.snippet?.thumbnails?.high?.url
+          target.snippet?.thumbnails?.high?.url
         ),
       };
     });
