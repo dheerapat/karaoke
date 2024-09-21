@@ -1,8 +1,11 @@
-import {google, youtube_v3} from 'googleapis';
+import {youtube_v3} from 'googleapis';
+import {inject, injectable, registry} from 'tsyringe';
+import {IYouTubeClient, YouTubeClient} from './shared/youtube-client';
+import {IChannelIdFetcher, YouTubeChannelIdFetcher} from './channel-id-fetcher';
 
 export interface Video {
-  videoUrl: URL;
   title: string;
+  videoUrl: URL;
   thumbnailUrl: URL;
 }
 
@@ -10,29 +13,39 @@ export interface IVideoSearcher {
   searchVideo(queryString: string): Promise<Video[]>;
 }
 
+@injectable()
+@registry([
+  {token: 'YouTubeClient', useClass: YouTubeClient},
+  {token: 'YouTubeChannelIdFetcher', useClass: YouTubeChannelIdFetcher},
+])
 export class YouTubeKaraokeVideoSearcher implements IVideoSearcher {
-  private client: youtube_v3.Youtube;
-  private channels = process.env.CHANNEL_IDS
-    ? process.env.CHANNEL_IDS.split(',')
+  private channels = process.env.CHANNEL_HANDLE
+    ? process.env.CHANNEL_HANDLE.split(',')
     : [];
 
-  constructor(apiKey: string) {
-    this.client = google.youtube({
-      version: 'v3',
-      auth: apiKey,
-    });
-  }
+  constructor(
+    @inject('YouTubeClient') private readonly youtubeClient: IYouTubeClient,
+    @inject('YouTubeChannelIdFetcher')
+    private readonly channelIdFetcher: IChannelIdFetcher
+  ) {}
 
   public async searchVideo(queryString: string): Promise<Video[]> {
+    const channelIds: string[] = [];
+    this.channels.forEach(async channel => {
+      const id =
+        await this.channelIdFetcher.getChannelIdFromChannelAlias(channel);
+      channelIds.push(id);
+    });
     try {
-      const res = await this.client.search.list({
+      const client = this.youtubeClient.client;
+      const res = await client.search.list({
         part: ['snippet'],
         q: queryString + ' karaoke',
         type: ['video'],
         maxResults: 25, // max: 50
       });
 
-      const result = this.parseSearchResult(res.data.items);
+      const result = this.parseSearchResult(res.data.items, channelIds);
       return result;
     } catch (e: unknown) {
       if (e instanceof Error) {
@@ -45,7 +58,8 @@ export class YouTubeKaraokeVideoSearcher implements IVideoSearcher {
   }
 
   private parseSearchResult(
-    items: youtube_v3.Schema$SearchResult[] | undefined
+    items: youtube_v3.Schema$SearchResult[] | undefined,
+    channels: string[]
   ): Video[] {
     if (!items) {
       return [];
@@ -53,8 +67,7 @@ export class YouTubeKaraokeVideoSearcher implements IVideoSearcher {
 
     const targets = items.filter(
       item =>
-        item.snippet?.channelId &&
-        this.channels.includes(item.snippet.channelId)
+        item.snippet?.channelId && channels.includes(item.snippet.channelId)
     );
 
     return targets.map(target => {

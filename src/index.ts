@@ -1,9 +1,9 @@
-import {YouTubeKaraokeVideoSearcher} from './app';
+import 'reflect-metadata';
+import {container} from 'tsyringe';
+import {YouTubeKaraokeVideoSearcher} from './utils/video-searcher';
 
-const searcher = new YouTubeKaraokeVideoSearcher(
-  process.env.YOUTUBE_API_KEY ?? ''
-);
+const searcher = container.resolve(YouTubeKaraokeVideoSearcher);
 
-searcher.searchVideo('โจอี้').then(res => {
+searcher.searchVideo('วาดไว้').then(res => {
   console.log(res);
 });
