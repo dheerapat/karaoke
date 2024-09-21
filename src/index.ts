@@ -4,6 +4,6 @@ import {YouTubeKaraokeVideoSearcher} from './utils/video-searcher';
 
 const searcher = container.resolve(YouTubeKaraokeVideoSearcher);
 
-searcher.searchVideo('วาดไว้').then(res => {
+searcher.searchVideo('จักรยานสีแดง').then(res => {
   console.log(res);
 });

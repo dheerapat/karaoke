@@ -6,7 +6,7 @@ export interface IYouTubeClient {
 }
 
 @singleton()
-export class YouTubeClient {
+export class YouTubeClient implements IYouTubeClient {
   public client: youtube_v3.Youtube;
 
   constructor() {

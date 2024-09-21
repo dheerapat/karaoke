@@ -59,7 +59,7 @@ export class YouTubeKaraokeVideoSearcher implements IVideoSearcher {
 
   private parseSearchResult(
     items: youtube_v3.Schema$SearchResult[] | undefined,
-    channels: string[]
+    channelIds: string[]
   ): Video[] {
     if (!items) {
       return [];
@@ -67,7 +67,7 @@ export class YouTubeKaraokeVideoSearcher implements IVideoSearcher {
 
     const targets = items.filter(
       item =>
-        item.snippet?.channelId && channels.includes(item.snippet.channelId)
+        item.snippet?.channelId && channelIds.includes(item.snippet.channelId)
     );
 
     return targets.map(target => {
